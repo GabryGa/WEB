@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Sensori</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet"> <!-- Link a Bootstrap CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script> <!-- Link a Axios -->
+</head>
+<body class="container">
+    <h1 class="mt-5">Dashboard Sensori</h1>
+    <button class="btn btn-danger" onclick="logout()">Logout</button> <!-- Bottone per fare logout -->
+    <h2 class="mt-4">Aggiungi Sensore</h2>
+    <form id="addSensorForm" class="mt-3">
+        <div class="form-group">
+            <label>Nome:</label>
+            <input type="text" id="sensorName" class="form-control" required> <!-- Campo per il nome del sensore -->
+
+            <label>Tipo:</label>
+            <input type="text" id="sensorType" class="form-control" required> <!-- Campo per il tipo del sensore -->
+
+            <label>Intervallo di aggiornamento (sec):</label>
+            <input type="number" id="updateInterval" class="form-control" required> <!-- Campo per l'intervallo di aggiornamento del sensore -->
+        </div>
+        <button type="button" class="btn btn-primary" onclick="addSensor()">Aggiungi Sensore</button> <!-- Bottone per inviare i dati del nuovo sensore -->
+    </form>
+
+    <h2 class="mt-4">Sensori Esistenti</h2>
+    <div id="sensorsList" class="mt-3"></div> <!-- Div per visualizzare i sensori esistenti -->
+
+    <script>
+        // Controlla se l'utente è autenticato
+        if (!sessionStorage.getItem('userId')) {
+            window.location.href = '/';
+        }
+
+        // Funzione per fare logout
+        function logout() {
+            sessionStorage.removeItem('userId');
+            window.location.href = '/';
+        }
+
+        // Funzione per aggiungere un nuovo sensore
+        async function addSensor() {
+            const userId = sessionStorage.getItem('userId'); // Ottiene l'ID utente dal sessionStorage
+            const name = document.getElementById('sensorName').value; // Ottiene il nome del sensore dal campo di input
+            const type = document.getElementById('sensorType').value; // Ottiene il tipo del sensore dal campo di input
+            const interval = document.getElementById('updateInterval').value; // Ottiene l'intervallo di aggiornamento dal campo di input
+
+            try {
+                const response = await axios.post('/sensors', {
+                    user: userId,
+                    name,
+                    type,
+                    updateInterval: interval
+                }); // Invia una richiesta POST a /sensors
+                alert(response.data.message); // Mostra il messaggio di risposta
+                fetchSensors(); // Aggiorna la lista dei sensori
+            } catch (error) {
+                alert(error.response.data); // Mostra l'errore di risposta
+            }
+        }
+
+        // Funzione per ottenere e visualizzare i sensori esistenti
+        async function fetchSensors() {
+            const userId = sessionStorage.getItem('userId'); // Ottiene l'ID utente dal sessionStorage
+            try {
+                const response = await axios.get('/sensors', { params: { user: userId } }); // Invia una richiesta GET a /sensors
+                const sensors = response.data; // Ottiene i dati dei sensori dalla risposta
+                const sensorsList = document.getElementById('sensorsList'); // Ottiene il div per visualizzare i sensori
+                sensorsList.innerHTML = ''; // Pulisce il div
+                sensors.forEach(sensor => { // Itera sui sensori e crea un div per ciascuno
+                    sensorsList.innerHTML += `<div class="card mt-2">
+                        <div class="card-body">
+                            <h5 class="card-title">${sensor.name}</h5>
+                            <p class="card-text">${sensor.type} - ogni ${sensor.updateInterval} secondi</p>
+                            <button class="btn btn-danger" onclick="deleteSensor('${sensor._id}')">Elimina</button>
+                            <button class="btn btn-secondary" onclick="editSensor('${sensor._id}', '${sensor.name}', '${sensor.type}', '${sensor.updateInterval}')">Modifica</button>
+                        </div>
+                    </div>`;
+                });
+            } catch (error) {
+                console.error('Error:', error); // Mostra eventuali errori
+            }
+        }
+
+        // Funzione per eliminare un sensore
+        async function deleteSensor(id) {
+            try {
+                const response = await axios.delete('/sensors/' + id); // Invia una richiesta DELETE a /sensors/{id}
+                alert(response.data.message); // Mostra il messaggio di risposta
+                fetchSensors(); // Aggiorna la lista dei sensori
+            } catch (error) {
+                console.error('Error:', error); // Mostra eventuali errori
+            }
+        }
+
+        // Funzione per modificare un sensore
+        async function editSensor(id, name, type, interval) {
+            const newName = prompt("Inserisci il nuovo nome del sensore:", name); // Chiede all'utente il nuovo nome del sensore
+            const newType = prompt("Inserisci il nuovo tipo del sensore:", type); // Chiede all'utente il nuovo tipo del sensore
+            const newInterval = prompt("Inserisci il nuovo intervallo di aggiornamento (secondi):", interval); // Chiede all'utente il nuovo intervallo di aggiornamento
+
+            try {
+                const response = await axios.patch('/sensors/' + id, {
+                    name: newName,
+                    type: newType,
+                    updateInterval: newInterval
+                }); // Invia una richiesta PATCH a /sensors/{id}
+                alert("Sensore aggiornato"); // Mostra il messaggio di risposta
+                fetchSensors(); // Aggiorna la lista dei sensori
+            } catch (error) {
+                console.error('Error:', error); // Mostra eventuali errori
+            }
+        }
+
+        window.onload = fetchSensors; // Chiama fetchSensors quando la pagina viene caricata
+    </script>
+</body>
+</html>
