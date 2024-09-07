@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8"> <!-- Specifica la codifica dei caratteri -->
+    <title>Dashboard Sensori</title> <!-- Titolo della pagina -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet"> <!-- Collegamento al CSS di Bootstrap -->
+    <script src="/socket.io/socket.io.js"></script> <!-- Collegamento al client di Socket.io -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <div class="container mt-5"> <!-- Contenitore Bootstrap con margine superiore -->
+        <h1>Dashboard Sensori</h1> <!-- Intestazione principale -->
+        <button class="btn btn-danger" onclick="logout()">Logout</button> <!-- Pulsante per il logout -->
+        <h2 class="mt-4">Aggiungi Sensore</h2> <!-- Intestazione per la sezione di aggiunta sensore -->
+        <input type="text" id="sensorName" class="form-control mb-2" placeholder="Nome del sensore" required> <!-- Campo per il nome del sensore -->
+        <input type="text" id="sensorType" class="form-control mb-2" placeholder="Tipo del sensore" required> <!-- Campo per il tipo del sensore -->
+        <input type="number" id="updateInterval" class="form-control mb-2" placeholder="Intervallo di aggiornamento (sec)" required> <!-- Campo per l'intervallo di aggiornamento -->
+        <button class="btn btn-primary" onclick="addSensor()">Aggiungi Sensore</button> <!-- Pulsante per aggiungere il sensore -->
+
+        <h2 class="mt-4">Sensori Esistenti</h2> <!-- Intestazione per la lista dei sensori esistenti -->
+        <div id="sensorsList"></div> <!-- Div per visualizzare i sensori esistenti -->
+    </div>
+
+    <script>
+        const socket = io(); // Inizializza la connessione a Socket.io
+
+        if (!sessionStorage.getItem('userId')) { // Controlla se l'utente è autenticato
+            window.location.href = '/'; // Reindirizza alla pagina di login se non autenticato
+        }
+
+        function logout() { // Funzione per il logout
+            sessionStorage.removeItem('userId'); // Rimuove l'ID utente dal sessionStorage
+            window.location.href = '/'; // Reindirizza alla pagina di login
+        }
+
+        function addSensor() { // Funzione per aggiungere un nuovo sensore
+            const userId = sessionStorage.getItem('userId'); // Ottiene l'ID utente dal sessionStorage
+            const name = document.getElementById('sensorName').value; // Ottiene il valore del nome del sensore
+            const type = document.getElementById('sensorType').value; // Ottiene il valore del tipo del sensore
+            const interval = parseInt(document.getElementById('updateInterval').value, 10); // Converte l'intervallo di aggiornamento in un numero
+            if (isNaN(interval) || interval <= 0) {
+                alert('L\'intervallo di aggiornamento deve essere un numero valido e positivo.');
+                return;
+            }
+            socket.emit('add-sensor', { user: userId, name, type, update_interval: interval }); // Invia i dati del sensore tramite Socket.io
+        }
+
+        function fetchSensors() { // Funzione per recuperare i sensori esistenti
+            const userId = sessionStorage.getItem('userId'); // Ottiene l'ID utente dal sessionStorage
+            socket.emit('fetch-sensors', userId); // Invia una richiesta per recuperare i sensori tramite Socket.io
+        }
+
+         function deleteSensor(id) { // Funzione per eliminare un sensore
+             socket.emit('delete-sensor', id); // Invia una richiesta per eliminare il sensore tramite Socket.io
+            fetchSensors(); // Aggiorna la lista dei sensori
+        }
+
+        function editSensor(id) { // Funzione per modificare un sensore
+            const newName = prompt("Inserisci il nuovo nome del sensore:"); // Richiede il nuovo nome del sensore
+            const newType = prompt("Inserisci il nuovo tipo del sensore:"); // Richiede il nuovo tipo del sensore
+            const newInterval = prompt("Inserisci il nuovo intervallo di aggiornamento (secondi):"); // Richiede il nuovo intervallo di aggiornamento
+            socket.emit('update-sensor', { id, name: newName, type: newType, update_interval: newInterval }); // Invia i dati aggiornati del sensore tramite Socket.io
+            fetchSensors(); // Aggiorna la lista dei sensori
+        }
+
+        socket.on('sensor-added', () => { // Gestisce l'evento di aggiunta di un nuovo sensore
+            fetchSensors(); // Aggiorna la lista dei sensori
+        });
+
+        socket.on('sensors-list', (sensors) => { // Gestisce l'evento di ricezione della lista dei sensori
+            const sensorsList = document.getElementById('sensorsList'); // Ottiene il div per visualizzare i sensori
+            sensorsList.innerHTML = ''; // Pulisce il div
+            sensors.forEach(sensor => { // Itera sui sensori e crea un div per ciascuno
+                sensorsList.innerHTML += `
+                    <div class="card mt-2">
+                        <div class="card-body">
+                            <h5 class="card-title">${sensor.name}</h5>
+                            <p class="card-text">${sensor.type} - Ogni ${sensor.update_interval} secondi - Current Value ${sensor.current_value}</p>
+                            <button class="btn btn-danger" onclick="deleteSensor('${sensor.id}')">Elimina</button>
+                            <button class="btn btn-secondary" onclick="editSensor('${sensor.id}')">Modifica</button>
+                        </div>
+                    </div>`;
+            });
+        });
+
+        window.onload = fetchSensors; // Chiama fetchSensors quando la pagina viene caricata
+    </script>
+</body>
+</html>
