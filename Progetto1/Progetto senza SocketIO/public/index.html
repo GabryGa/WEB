@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Sensori</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet"> <!-- Link a Bootstrap CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script> <!-- Link a Axios -->
+</head>
+<body class="container">
+    <h1 class="mt-5">Benvenuto alla Dashboard di Gestione Sensori</h1>
+    <div class="mt-4">
+        <button class="btn btn-primary" onclick="showRegister()">Registrati</button> <!-- Bottone per mostrare il form di registrazione -->
+        <button class="btn btn-secondary" onclick="showLogin()">Accedi</button> <!-- Bottone per mostrare il form di login -->
+    </div>
+
+    <div id="registerForm" class="mt-4" style="display:none;">
+        <h2>Registrazione</h2>
+        <div class="form-group">
+            <label>Email:</label>
+            <input type="email" id="registerEmail" class="form-control" required> <!-- Campo per l'email di registrazione -->
+        </div>
+        <div class="form-group">
+            <label>Password:</label>
+            <input type="password" id="registerPassword" class="form-control" required> <!-- Campo per la password di registrazione -->
+        </div>
+        <button class="btn btn-success" onclick="register()">Crea Account</button> <!-- Bottone per inviare i dati di registrazione -->
+    </div>
+
+    <div id="loginForm" class="mt-4" style="display:none;">
+        <h2>Login</h2>
+        <div class="form-group">
+            <label>Email:</label>
+            <input type="email" id="loginEmail" class="form-control" required> <!-- Campo per l'email di login -->
+        </div>
+        <div class="form-group">
+            <label>Password:</label>
+            <input type="password" id="loginPassword" class="form-control" required> <!-- Campo per la password di login -->
+        </div>
+        <button class="btn btn-success" onclick="login()">Accedi</button> <!-- Bottone per inviare i dati di login -->
+    </div>
+
+    <script>
+        // Controlla se l'utente è autenticato
+        if (sessionStorage.getItem('userId')) {
+            window.location.href = '/dashboard';
+        }
+        
+        // Funzione per mostrare il form di registrazione e nascondere il form di login
+        function showRegister() {
+            document.getElementById('registerForm').style.display = 'block';
+            document.getElementById('loginForm').style.display = 'none';
+        }
+
+        // Funzione per mostrare il form di login e nascondere il form di registrazione
+        function showLogin() {
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('registerForm').style.display = 'none';
+        }
+
+        // Funzione per registrare un nuovo utente
+        async function register() {
+            const email = document.getElementById('registerEmail').value; // Ottiene l'email dal campo di input
+            const password = document.getElementById('registerPassword').value; // Ottiene la password dal campo di input
+            try {
+                const response = await axios.post('/register', { email, password }); // Invia una richiesta POST a /register
+                alert(response.data); // Mostra il messaggio di risposta
+            } catch (error) {
+                alert(error.response.data); // Mostra l'errore di risposta
+            }
+        }
+
+        // Funzione per effettuare il login
+        async function login() {
+            const email = document.getElementById('loginEmail').value; // Ottiene l'email dal campo di input
+            const password = document.getElementById('loginPassword').value; // Ottiene la password dal campo di input
+            try {
+                const response = await axios.post('/login', { email, password }); // Invia una richiesta POST a /login
+                sessionStorage.setItem('userId', response.data.user); // Salva l'ID utente nel sessionStorage
+                window.location.href = '/dashboard'; // Reindirizza alla pagina della dashboard
+            } catch (error) {
+                alert(error.response.data.message); // Mostra l'errore di risposta
+            }
+        }
+    </script>
+</body>
+</html>
