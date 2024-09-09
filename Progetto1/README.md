@@ -1,4 +1,4 @@
-npm install express socket.io bcryptjs mongoose dotenv bootstrap \
+npm install express socket.io bcryptjs mongoose dotenv \
 npm install --save-dev nodemon \
 quest'ultimo riavvia automaticamente il server quando vengono apportate modifiche al codice. Viene installato come dipendenza di      sviluppo per facilitare il workflow durante la programmazione.
 
