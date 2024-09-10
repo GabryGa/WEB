@@ -9,24 +9,22 @@
 <body>
     <div class="container mt-5"> <!-- Contenitore Bootstrap con margine superiore -->
         <h1 class="mb-3">Benvenuto alla Dashboard di Accesso</h1> <!-- Intestazione principale -->
-        <div class="row justify-content-center"> <!-- Riga Bootstrap centrata -->
-            <div class="col-md-6"> <!-- Colonna Bootstrap media (6/12) -->
-                <div class="d-grid gap-2"> <!-- Div per gestire i pulsanti con gap -->
-                    <button class="btn btn-primary" onclick="showRegister()">Registrati</button> <!-- Pulsante per mostrare il form di registrazione -->
-                    <button class="btn btn-secondary" onclick="showLogin()">Accedi</button> <!-- Pulsante per mostrare il form di login -->
-                </div>
-                <div id="registerForm" class="mt-4" style="display:none;"> <!-- Form di registrazione nascosto inizialmente -->
-                    <h2>Registrazione</h2> <!-- Intestazione del form di registrazione -->
-                    <input type="email" id="registerEmail" class="form-control mb-2" placeholder="Email" required> <!-- Campo email per registrazione -->
-                    <input type="password" id="registerPassword" class="form-control mb-2" placeholder="Password" required> <!-- Campo password per registrazione -->
-                    <button class="btn btn-success" onclick="register()">Crea Account</button> <!-- Pulsante per inviare i dati di registrazione -->
-                </div>
-                <div id="loginForm" class="mt-4" style="display:none;"> <!-- Form di login nascosto inizialmente -->
-                    <h2>Login</h2> <!-- Intestazione del form di login -->
-                    <input type="email" id="loginEmail" class="form-control mb-2" placeholder="Email" required> <!-- Campo email per login -->
-                    <input type="password" id="loginPassword" class="form-control mb-2" placeholder="Password" required> <!-- Campo password per login -->
-                    <button class="btn btn-success" onclick="login()">Accedi</button> <!-- Pulsante per inviare i dati di login -->
-                </div>
+        <div class="col-md-6"> <!-- Colonna Bootstrap media (6/12) -->
+            <div class="d-grid gap-2"> <!-- Div per gestire i pulsanti con gap -->
+                <button class="btn btn-primary" onclick="showRegister()">Registrati</button> <!-- Pulsante per mostrare il form di registrazione -->
+                <button class="btn btn-secondary" onclick="showLogin()">Accedi</button> <!-- Pulsante per mostrare il form di login -->
+            </div>
+            <div id="registerForm" class="mt-4" style="display:none;"> <!-- Form di registrazione nascosto inizialmente -->
+                <h2>Registrazione</h2> <!-- Intestazione del form di registrazione -->
+                <input type="email" id="registerEmail" class="form-control mb-2" placeholder="Email" required> <!-- Campo email per registrazione -->
+                <input type="password" id="registerPassword" class="form-control mb-2" placeholder="Password" required> <!-- Campo password per registrazione -->
+                <button class="btn btn-success" onclick="register()">Crea Account</button> <!-- Pulsante per inviare i dati di registrazione -->
+            </div>
+            <div id="loginForm" class="mt-4" style="display:none;"> <!-- Form di login nascosto inizialmente -->
+                <h2>Login</h2> <!-- Intestazione del form di login -->
+                <input type="email" id="loginEmail" class="form-control mb-2" placeholder="Email" required> <!-- Campo email per login -->
+                <input type="password" id="loginPassword" class="form-control mb-2" placeholder="Password" required> <!-- Campo password per login -->
+                <button class="btn btn-success" onclick="login()">Accedi</button> <!-- Pulsante per inviare i dati di login -->
             </div>
         </div>
     </div>
