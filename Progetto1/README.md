@@ -3,6 +3,7 @@ npm install --save-dev nodemon \
 quest'ultimo riavvia automaticamente il server quando vengono apportate modifiche al codice. Viene installato come dipendenza di      sviluppo per facilitare il workflow durante la programmazione.
 
 Per il progetto con MySQL
+npm install mysql
 -- Create the database
 CREATE DATABASE sensori_db;
 
