@@ -1,0 +1,29 @@
+section');
+        const resultParagraph = document.getElementById('result');
+        const moveButtons = document.querySelectorAll('.move');
+ 
+        joinButton.addEventListener('click', () => {
+            const room = roomInput.value;
+            socket.emit('joinRoom', room);
+            document.getElementById('room-section').style.display = 'none';
+            gameSection.style.display = 'block';
+        });
+ 
+        moveButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const move = button.getAttribute('data-move');
+                const room = roomInput.value;
+                socket.emit('makeMove', { room, move });
+            });
+        });
+ 
+        socket.on('startGame', () => {
+            resultParagraph.textContent = 'Entrambi i giocatori sono pronti. Fai la tua mossa!';
+        });
+ 
+        socket.on('gameResult', ({ firstPlayerMove, secondPlayerMove, result }) => {
+            resultParagraph.textContent = `Giocatore 1: ${firstPlayerMove}, Giocatore 2: ${secondPlayerMove}. Risultato: ${result}`;
+        });
+    </script>
+</body>
+</html>
