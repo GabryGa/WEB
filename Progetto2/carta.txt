@@ -1,4 +1,109 @@
-section');
+server.js
+const express = require('express');
+const http = require('http');
+const { Server } = require('socket.io');
+ 
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server);
+ 
+const rooms = {}; // memorizza le scelte dei giocatori per ogni stanza
+ 
+app.use(express.static('public')); // Servire i file statici per il client
+ 
+io.on('connection', (socket) => {
+    console.log('Un utente si è connesso');
+ 
+    socket.on('joinRoom', (room) => {
+        socket.join(room);
+        console.log(`Utente ha unito la stanza ${room}`);
+ 
+        if (!rooms[room]) {
+            rooms[room] = {};
+        }
+ 
+        if (Object.keys(rooms[room]).length === 2) {
+            io.to(room).emit('startGame');
+        }
+    });
+ 
+    socket.on('makeMove', ({ room, move }) => {
+        rooms[room][socket.id] = move;
+ 
+        if (Object.keys(rooms[room]).length === 2) {
+            const [firstPlayer, secondPlayer] = Object.keys(rooms[room]);
+            const result = determineWinner(rooms[room][firstPlayer], rooms[room][secondPlayer]);
+ 
+            io.to(room).emit('gameResult', {
+                firstPlayerMove: rooms[room][firstPlayer],
+                secondPlayerMove: rooms[room][secondPlayer],
+                result,
+            });
+ 
+            // Resetta la stanza per il prossimo round
+            rooms[room] = {};
+        }
+    });
+ 
+    socket.on('disconnect', () => {
+        console.log('Un utente si è disconnesso');
+        // eventuale gestione per pulizia
+    });
+});
+ 
+// Funzione per determinare il vincitore
+function determineWinner(move1, move2) {
+    if (move1 === move2) {
+        return 'Pareggio';
+    }
+    if (
+        (move1 === 'sasso' && move2 === 'forbice') ||
+        (move1 === 'forbice' && move2 === 'carta') ||
+        (move1 === 'carta' && move2 === 'sasso')
+    ) {
+        return 'Giocatore 1 vince';
+    }
+    return 'Giocatore 2 vince';
+}
+ 
+server.listen(3000, () => {
+    console.log('Server in ascolto sulla porta 3000');
+});
+ 
+
+ 
+
+Index.html
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carta Forbice Sasso</title>
+</head>
+<body>
+    <h1>Carta, Forbice, Sasso</h1>
+    <div id="room-section">
+        <input type="text" id="room" placeholder="Nome stanza">
+        <button id="join">Entra nella stanza</button>
+    </div>
+ 
+    <div id="game-section" style="display:none;">
+        <p>Scegli una mossa:</p>
+        <button class="move" data-move="carta">Carta</button>
+        <button class="move" data-move="forbice">Forbice</button>
+        <button class="move" data-move="sasso">Sasso</button>
+ 
+        <p id="result"></p>
+    </div>
+ 
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+ 
+        const roomInput = document.getElementById('room');
+        const joinButton = document.getElementById('join');
+        const gameSection = document.getElementById('game-section');
         const resultParagraph = document.getElementById('result');
         const moveButtons = document.querySelectorAll('.move');
  

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carta Forbice Sasso</title>
+</head>
+<body>
+    <h1>Carta, Forbice, Sasso</h1>
+    <div id="room-section">
+        <input type="text" id="room" placeholder="Nome stanza">
+        <button id="join">Entra nella stanza</button>
+    </div>
+ 
+    <div id="game-section" style="display:none;">
+        <p>Scegli una mossa:</p>
+        <button class="move" data-move="carta">Carta</button>
+        <button class="move" data-move="forbice">Forbice</button>
+        <button class="move" data-move="sasso">Sasso</button>
+ 
+        <p id="result"></p>
+    </div>
+ 
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+ 
+        const roomInput = document.getElementById('room');
+        const joinButton = document.getElementById('join');
+        const gameSection = document.getElementById('game-section');
+        const resultParagraph = document.getElementById('result');
+        const moveButtons = document.querySelectorAll('.move');
+ 
+        joinButton.addEventListener('click', () => {
+            const room = roomInput.value;
+            socket.emit('joinRoom', room);
+            document.getElementById('room-section').style.display = 'none';
+            gameSection.style.display = 'block';
+        });
+ 
+        moveButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const move = button.getAttribute('data-move');
+                const room = roomInput.value;
+                socket.emit('makeMove', { room, move });
+            });
+        });
+ 
+        socket.on('startGame', () => {
+            resultParagraph.textContent = 'Entrambi i giocatori sono pronti. Fai la tua mossa!';
+        });
+ 
+        socket.on('gameResult', ({ firstPlayerMove, secondPlayerMove, result }) => {
+            resultParagraph.textContent = `Giocatore 1: ${firstPlayerMove}, Giocatore 2: ${secondPlayerMove}. Risultato: ${result}`;
+        });
+    </script>
+</body>
+</html>
